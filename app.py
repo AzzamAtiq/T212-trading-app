@@ -16,8 +16,8 @@ import yfinance as yf
 # ══════════════════════════════════════════════
 #  CONFIG — fill these in
 # ══════════════════════════════════════════════
-T212_API_KEY   = os.getenv("T212_API_KEY",   "45630273ZTxydzxcBJmrICxhXzfiSQaImblDk")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyA9GO_OJXFwK07YstMzRWk8LHV6j8erTqU")
+T212_API_KEY   = os.getenv("T212_API_KEY",   "your Trading 212 API key")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "YOur API key")
 T212_MODE      = os.getenv("T212_MODE",      "live")   # "live" or "demo"
 # ══════════════════════════════════════════════
 
