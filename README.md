@@ -4,14 +4,14 @@ An AI-powered stock market intelligence dashboard built with Flask, Google Gemin
 
 ## Features
 
-- 📈 Live market movers
-- 🤖 AI-generated stock analysis
-- 💼 Trading 212 portfolio integration
-- 🔥 Top gainers & losers tracking
-- ⚡ Sudden spikes & crashes detection
-- 📊 Sector analysis
-- 🧠 AI investment picks
-- 🌐 Real-time market insights
+- Live market movers
+- AI-generated stock analysis
+- Trading 212 portfolio integration
+- Top gainers & losers tracking
+- Sudden spikes & crashes detection
+- Sector analysis
+- AI investment picks
+- Real-time market insights
 
 ---
 
@@ -138,7 +138,7 @@ yfinance>=0.2.36
 
 # Security Warning
 
-⚠️ Never expose your API keys publicly.
+Never expose your API keys publicly.
 
 For production use environment variables instead of hardcoding keys.
 
