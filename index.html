@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>T212 AI Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070f;--bg2:#0f0f1a;--bg3:#16161f;--bg4:#1e1e2a;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--text:#e4e4f0;--text2:#8888a8;--text3:#505068;--green:#1dba86;--green2:rgba(29,186,134,0.12);--red:#e05050;--red2:rgba(224,80,80,0.12);--amber:#e8a830;--amber2:rgba(232,168,48,0.12);--blue:#4a9eff;--blue2:rgba(74,158,255,0.1);--gold:#f5c842;--gold2:rgba(245,200,66,0.12);--r:10px;--r2:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:50px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:.1em;color:var(--text)}
+.logo span{color:var(--green)}
+.status-pill{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3)}
+.dot.on{background:var(--green);animation:blink 2s infinite}
+.dot.err{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.acct{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2)}
+.acct span{color:var(--green);font-weight:600}
+.clk{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)}
+
+/* LAYOUT */
+.app{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:210px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:1rem 0;overflow-y:auto;display:flex;flex-direction:column}
+.sb-section{padding:0 .75rem;margin-bottom:1.25rem}
+.sb-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding:0 .5rem;margin-bottom:6px}
+.nav{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--r2);font-size:12px;color:var(--text2);cursor:pointer;transition:all .15s;margin-bottom:2px;border:1px solid transparent;user-select:none}
+.nav:hover{background:var(--bg3);color:var(--text)}
+.nav.active{background:var(--bg3);color:var(--green);border-color:rgba(29,186,134,.15)}
+.nav-icon{font-size:13px;width:16px;text-align:center}
+.nav-badge{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:1px 6px;border-radius:3px}
+.bg{background:var(--green2);color:var(--green)}
+.br{background:var(--red2);color:var(--red)}
+.ba{background:var(--amber2);color:var(--amber)}
+.bgo{background:var(--gold2);color:var(--gold)}
+
+/* PICKS HIGHLIGHT in sidebar */
+.nav.picks-nav{background:var(--gold2);color:var(--gold);border-color:rgba(245,200,66,.25)}
+.nav.picks-nav:hover{background:rgba(245,200,66,.2)}
+.nav.picks-nav.active{background:rgba(245,200,66,.2);color:var(--gold);border-color:rgba(245,200,66,.4)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:1.5rem}
+.page{display:none}.page.active{display:block}
+.page-title{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:1.25rem}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem}
+.stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:var(--text)}
+.stat-val.up{color:var(--green)}.stat-val.down{color:var(--red)}
+
+/* MOVERS */
+.movers-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:1.5rem}
+.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.mc-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)}
+.mc-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.mc-title.g{color:var(--green)}.mc-title.r{color:var(--red)}
+.mc-upd{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)}
+.mr{display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);transition:background .1s}
+.mr:last-child{border-bottom:none}.mr:hover{background:var(--bg3)}
+.mr-ticker{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--text);width:65px}
+.mr-price{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);flex:1}
+.mr-chg{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px}
+.mr-chg.up{color:var(--green);background:var(--green2)}.mr-chg.dn{color:var(--red);background:var(--red2)}
+
+/* SCAN CARDS */
+.scan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--a,var(--green));opacity:0;transition:opacity .18s}
+.sc:hover{border-color:var(--border2);background:var(--bg3)}.sc:hover::before{opacity:1}
+.sc.ga{--a:var(--green)}.sc.ra{--a:var(--red)}.sc.aa{--a:var(--amber)}.sc.ba2{--a:var(--blue)}.sc.goa{--a:var(--gold)}
+.sc-icon{font-size:16px;margin-bottom:7px}.sc-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+.sc-desc{font-size:11px;color:var(--text2);line-height:1.4}
+.sc-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px;margin-top:7px;font-weight:500;letter-spacing:.04em}
+
+/* AI OUTPUT */
+.ai-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.ai-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.ai-hdr-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--text2);text-transform:uppercase}
+.ai-scanning{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--green)}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-body{padding:1.25rem 1.5rem;min-height:200px;font-size:13px;line-height:1.85;color:var(--text);white-space:pre-wrap;word-wrap:break-word}
+.ai-body h3,.ai-body h2,.ai-body h1{color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin:1rem 0 .4rem}
+.ai-body strong{color:var(--text);font-weight:600}
+.up-t{color:var(--green);font-weight:600}.dn-t{color:var(--red);font-weight:600}
+.ai-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:8px}
+.ai-empty-icon{font-size:28px;opacity:.15}
+.ai-empty-txt{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.05em}
+
+/* ── AI PICKS PAGE ── */
+.picks-hero{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);border:1px solid rgba(245,200,66,.2);border-radius:var(--r);padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between}
+.picks-hero-left h2{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:var(--gold);margin-bottom:4px}
+.picks-hero-left p{font-size:12px;color:var(--text2);line-height:1.5}
+.picks-run-btn{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:12px 24px;border-radius:var(--r2);border:none;background:var(--gold);color:#000;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:opacity .15s,transform .1s;white-space:nowrap}
+.picks-run-btn:hover{opacity:.85}.picks-run-btn:active{transform:scale(.97)}
+.picks-run-btn:disabled{opacity:.4;cursor:not-allowed}
+
+.picks-info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.pick-info-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem}
+.pi-icon{font-size:18px;margin-bottom:6px}
+.pi-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+.pi-desc{font-size:11px;color:var(--text2);line-height:1.4}
+
+/* SCORE BAR */
+.score-bar-wrap{display:flex;align-items:center;gap:8px;margin:4px 0}
+.score-bar{height:6px;border-radius:3px;background:var(--bg4);flex:1;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;background:var(--green);transition:width .6s ease}
+.score-fill.med{background:var(--amber)}.score-fill.low{background:var(--red)}
+.score-num{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--text);min-width:28px}
+
+/* FILTER */
+.filter-row{display:flex;gap:6px;margin-bottom:1rem;align-items:center;flex-wrap:wrap}
+.filter-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-right:4px}
+.fbtn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+.fbtn:hover{background:var(--bg3);color:var(--text)}
+.fbtn.active{border-color:var(--green);color:var(--green);background:var(--green2)}
+
+/* ASK */
+.ask-row{display:flex;gap:8px;margin-bottom:1.25rem}
+.ask-in{flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);outline:none;transition:border-color .15s}
+.ask-in::placeholder{color:var(--text3)}.ask-in:focus{border-color:var(--green)}
+.ask-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:10px 18px;border-radius:var(--r2);border:none;background:var(--green);color:#000;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;transition:opacity .15s}
+.ask-btn:hover{opacity:.85}.ask-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* QUICK */
+.quick-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem}
+.qbtn{font-size:11px;padding:5px 11px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .15s}
+.qbtn:hover{border-color:var(--green);color:var(--green)}
+
+/* TABLE */
+.pos-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.pos-tbl th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3)}
+.pos-tbl td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace}
+.pos-tbl tr:last-child td{border-bottom:none}.pos-tbl tr:hover td{background:var(--bg3)}
+.tag{font-size:10px;padding:2px 7px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-weight:600}
+.tag.up{background:var(--green2);color:var(--green)}.tag.dn{background:var(--red2);color:var(--red)}
+
+.err-banner{background:var(--red2);border:1px solid rgba(224,80,80,.2);border-radius:var(--r2);padding:10px 14px;color:var(--red);font-size:12px;margin-bottom:1rem}
+.loading-row{display:flex;align-items:center;justify-content:center;padding:2rem;gap:8px;color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:12px}
+
+@media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr)}.scan-grid{grid-template-columns:repeat(2,1fr)}.movers-grid{grid-template-columns:1fr}.picks-info-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.sidebar{display:none}.stat-grid,.scan-grid,.picks-info-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="logo">T<span>212</span> · AI <span style="font-size:10px;color:var(--text3)">v2.0</span></div>
+    <div class="status-pill"><div class="dot" id="sDot"></div><span id="sTxt">Connecting…</span></div>
+  </div>
+  <div class="topbar-right">
+    <div class="acct" id="acctBadge"></div>
+    <div class="clk" id="clk"></div>
+  </div>
+</div>
+
+<div class="app">
+<nav class="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Portfolio</div>
+    <div class="nav active" onclick="go('dashboard')"><span class="nav-icon">◈</span>Dashboard</div>
+    <div class="nav" onclick="go('portfolio')"><span class="nav-icon">⊟</span>My Positions</div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">⭐ AI Picks</div>
+    <div class="nav picks-nav" onclick="go('picks')"><span class="nav-icon">🏆</span>Best to Invest<span class="nav-badge bgo">AI</span></div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Market Scanner</div>
+    <div class="nav" onclick="go('scanner');scan('winners')"><span class="nav-icon">▲</span>Top Winners<span class="nav-badge bg" id="wc">—</span></div>
+    <div class="nav" onclick="go('scanner');scan('losers')"><span class="nav-icon">▼</span>Top Losers<span class="nav-badge br" id="lc">—</span></div>
+    <div class="nav" onclick="go('scanner');scan('spikes')"><span class="nav-icon">⚡</span>Sudden Spikes<span class="nav-badge ba" id="sc2">—</span></div>
+    <div class="nav" onclick="go('scanner');scan('crashes')"><span class="nav-icon">◉</span>Sudden Crashes<span class="nav-badge br" id="cc">—</span></div>
+    <div class="nav" onclick="go('scanner');scan('sectors')"><span class="nav-icon">⊞</span>Sector Heatmap</div>
+    <div class="nav" onclick="go('scanner');scan('full')"><span class="nav-icon">★</span>Full Pulse</div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">AI Tools</div>
+    <div class="nav" onclick="go('ask')"><span class="nav-icon">◇</span>Ask Anything</div>
+    <div class="nav" onclick="go('portai')"><span class="nav-icon">◆</span>Analyse Portfolio</div>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">Dashboard</div>
+  <div id="acctErr"></div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv-total">—</div><div style="font-size:11px;color:var(--text3);margin-top:4px" id="sv-cur"></div></div>
+    <div class="stat-card"><div class="stat-lbl">Available Cash</div><div class="stat-val" id="sv-cash">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Unrealised P&L</div><div class="stat-val" id="sv-pnl">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Account Mode</div><div class="stat-val" id="sv-mode" style="font-size:15px">—</div></div>
+  </div>
+  <div class="movers-grid">
+    <div class="mc">
+      <div class="mc-hdr"><span class="mc-title g">▲ Top Winners</span><span class="mc-upd" id="mTime">Loading…</span></div>
+      <div id="wList"><div class="loading-row"><span class="spin">↻</span>Fetching…</div></div>
+    </div>
+    <div class="mc">
+      <div class="mc-hdr"><span class="mc-title r">▼ Top Losers</span><span class="mc-upd">Live</span></div>
+      <div id="lList"><div class="loading-row"><span class="spin">↻</span>Fetching…</div></div>
+    </div>
+  </div>
+  <div class="scan-grid">
+    <div class="sc goa" onclick="go('picks')" style="border-color:rgba(245,200,66,.2)">
+      <div class="sc-icon">🏆</div><div class="sc-title">AI Investment Picks</div>
+      <div class="sc-desc">Best stocks to invest in right now with prediction scores</div>
+      <span class="sc-tag" style="background:var(--gold2);color:var(--gold)">NEW · AI PICKS</span>
+    </div>
+    <div class="sc ga" onclick="go('scanner');scan('winners')"><div class="sc-icon">▲</div><div class="sc-title">Top Winners AI</div><div class="sc-desc">Deep analysis of biggest gainers</div><span class="sc-tag bg">SCAN</span></div>
+    <div class="sc ra" onclick="go('scanner');scan('losers')"><div class="sc-icon">▼</div><div class="sc-title">Top Losers AI</div><div class="sc-desc">Falling stocks with cause & outlook</div><span class="sc-tag br">SCAN</span></div>
+    <div class="sc aa" onclick="go('scanner');scan('spikes')"><div class="sc-icon">⚡</div><div class="sc-title">Sudden Spikes</div><div class="sc-desc">Unexpected surges — short squeeze, FDA</div><span class="sc-tag ba">ALERTS</span></div>
+    <div class="sc ra" onclick="go('scanner');scan('crashes')"><div class="sc-icon">◉</div><div class="sc-title">Sudden Crashes</div><div class="sc-desc">Stocks in freefall with danger level</div><span class="sc-tag br">ALERTS</span></div>
+    <div class="sc ba2" onclick="go('scanner');scan('full')"><div class="sc-icon">★</div><div class="sc-title">Full Market Pulse</div><div class="sc-desc">Complete intelligence report in one click</div><span class="sc-tag" style="background:var(--blue2);color:var(--blue)">FULL</span></div>
+  </div>
+</div>
+
+<!-- MY POSITIONS -->
+<div class="page" id="page-portfolio">
+  <div class="page-title">My Positions</div>
+  <div id="posContent"><div class="loading-row"><span class="spin">↻</span>Loading…</div></div>
+</div>
+
+<!-- AI INVESTMENT PICKS -->
+<div class="page" id="page-picks">
+  <div class="page-title">AI Investment Picks</div>
+  <div class="picks-hero">
+    <div class="picks-hero-left">
+      <h2>🏆 Best Stocks to Invest in Right Now</h2>
+      <p>AI scans ALL top winners AND losers, analyses each one, then picks the best 5 with prediction scores.<br>Saves you hours of research in one click.</p>
+    </div>
+    <button class="picks-run-btn" id="picksBtn" onclick="runPicks()">Run AI Picks ▶</button>
+  </div>
+  <div class="picks-info-grid">
+    <div class="pick-info-card"><div class="pi-icon">🔍</div><div class="pi-title">Scans 30+ stocks</div><div class="pi-desc">Analyses all top movers — winners AND losers — for the best opportunity</div></div>
+    <div class="pick-info-card"><div class="pi-icon">📊</div><div class="pi-title">Prediction Score /10</div><div class="pi-desc">Each pick gets an AI score, confidence level, entry point and stop loss</div></div>
+    <div class="pick-info-card"><div class="pi-icon">⚡</div><div class="pi-title">Real-time data</div><div class="pi-desc">Uses Google Search to get live prices, news and catalysts right now</div></div>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">Market:</span>
+    <button class="fbtn active" onclick="setMkt(this,'All')">All</button>
+    <button class="fbtn" onclick="setMkt(this,'US')">🇺🇸 US</button>
+    <button class="fbtn" onclick="setMkt(this,'UK')">🇬🇧 UK</button>
+    <button class="fbtn" onclick="setMkt(this,'EU')">🇪🇺 EU</button>
+    <button class="fbtn" onclick="setMkt(this,'Crypto')">₿ Crypto</button>
+  </div>
+  <div class="ai-wrap" id="picksOutput">
+    <div class="ai-hdr"><span class="ai-hdr-title">AI Investment Picks</span></div>
+    <div class="ai-body"><div class="ai-empty"><div class="ai-empty-icon">🏆</div><div class="ai-empty-txt">Click "Run AI Picks" above to get your investment recommendations</div></div></div>
+  </div>
+</div>
+
+<!-- SCANNER -->
+<div class="page" id="page-scanner">
+  <div class="page-title">Market Scanner</div>
+  <div class="filter-row">
+    <span class="filter-label">Market:</span>
+    <button class="fbtn active" onclick="setMkt(this,'All')">All</button>
+    <button class="fbtn" onclick="setMkt(this,'US')">🇺🇸 US</button>
+    <button class="fbtn" onclick="setMkt(this,'UK')">🇬🇧 UK</button>
+    <button class="fbtn" onclick="setMkt(this,'EU')">🇪🇺 EU</button>
+    <button class="fbtn" onclick="setMkt(this,'Crypto')">₿ Crypto</button>
+    <button class="fbtn" onclick="setMkt(this,'ETF')">ETF</button>
+  </div>
+  <div class="scan-grid" style="margin-bottom:1.25rem">
+    <div class="sc ga" onclick="scan('winners')"><div class="sc-icon">▲</div><div class="sc-title">Top Winners</div></div>
+    <div class="sc ra" onclick="scan('losers')"><div class="sc-icon">▼</div><div class="sc-title">Top Losers</div></div>
+    <div class="sc aa" onclick="scan('spikes')"><div class="sc-icon">⚡</div><div class="sc-title">Sudden Spikes</div></div>
+    <div class="sc ra" onclick="scan('crashes')"><div class="sc-icon">◉</div><div class="sc-title">Sudden Crashes</div></div>
+    <div class="sc ba2" onclick="scan('sectors')"><div class="sc-icon">⊞</div><div class="sc-title">Sector Heatmap</div></div>
+    <div class="sc ga" onclick="scan('full')"><div class="sc-icon">★</div><div class="sc-title">Full Pulse</div></div>
+  </div>
+  <div class="ai-wrap" id="scanOut">
+    <div class="ai-hdr"><span class="ai-hdr-title">AI Analysis</span></div>
+    <div class="ai-body"><div class="ai-empty"><div class="ai-empty-icon">◈</div><div class="ai-empty-txt">Select a scan type above</div></div></div>
+  </div>
+</div>
+
+<!-- ASK ANYTHING -->
+<div class="page" id="page-ask">
+  <div class="page-title">Ask Anything</div>
+  <div class="ask-row">
+    <input class="ask-in" id="askIn" placeholder="e.g. Which bank stocks are up today? Any biotech stocks moving on FDA news?" />
+    <button class="ask-btn" id="askBtn" onclick="runAsk()">Ask AI ▶</button>
+  </div>
+  <div class="quick-wrap">
+    <button class="qbtn" onclick="setQ('What are the top 10 US stock gainers today?')">Top 10 US gainers</button>
+    <button class="qbtn" onclick="setQ('Which stocks are up more than 10% today and why?')">+10% movers</button>
+    <button class="qbtn" onclick="setQ('Which stocks crashed more than 5% today?')">Crash alerts</button>
+    <button class="qbtn" onclick="setQ('What is the overall market sentiment today?')">Market mood</button>
+    <button class="qbtn" onclick="setQ('Which stocks are hitting 52-week highs today?')">52-week highs</button>
+    <button class="qbtn" onclick="setQ('Show me stocks with unusually high volume today')">Volume spikes</button>
+    <button class="qbtn" onclick="setQ('What are the most shorted stocks right now?')">Most shorted</button>
+    <button class="qbtn" onclick="setQ('Any biotech or pharma stocks moving on news today?')">Biotech movers</button>
+    <button class="qbtn" onclick="setQ('Which tech stocks should I watch this week?')">Tech watchlist</button>
+    <button class="qbtn" onclick="setQ('What are analysts recommending to buy this week?')">Analyst picks</button>
+  </div>
+  <div class="ai-wrap" id="askOut">
+    <div class="ai-hdr"><span class="ai-hdr-title">AI Response</span></div>
+    <div class="ai-body"><div class="ai-empty"><div class="ai-empty-icon">◇</div><div class="ai-empty-txt">Ask any market question above</div></div></div>
+  </div>
+</div>
+
+<!-- PORTFOLIO AI -->
+<div class="page" id="page-portai">
+  <div class="page-title">Portfolio AI Analysis</div>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:1rem">AI fetches your live T212 positions and analyses them against today's market.</p>
+  <button class="ask-btn" onclick="runPortAI()" style="margin-bottom:1.25rem">Analyse My Portfolio ▶</button>
+  <div class="ai-wrap" id="portAIOut">
+    <div class="ai-hdr"><span class="ai-hdr-title">Portfolio Analysis</span></div>
+    <div class="ai-body"><div class="ai-empty"><div class="ai-empty-icon">◆</div><div class="ai-empty-txt">Click above to start</div></div></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+let mkt = 'All', scanning = false;
+
+// clock
+function tick(){
+  const d=new Date();
+  document.getElementById('clk').textContent=
+    d.toLocaleTimeString('en-US',{hour12:false,timeZone:'America/New_York'})+' ET';
+}
+setInterval(tick,1000);tick();
+
+// nav
+function go(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='portfolio') loadPos();
+}
+
+// market filter
+function setMkt(btn,m){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); mkt=m;
+}
+
+// status
+async function loadStatus(){
+  try{
+    const d=await(await fetch('/api/status')).json();
+    const dot=document.getElementById('sDot'),txt=document.getElementById('sTxt');
+    if(d.connected){
+      dot.className='dot on'; txt.textContent=`${d.mode.toUpperCase()} · Connected`;
+      document.getElementById('acctBadge').innerHTML=`<span>${Number(d.totalValue).toFixed(2)} ${d.currency}</span>`;
+      document.getElementById('sv-total').textContent=Number(d.totalValue).toFixed(2);
+      document.getElementById('sv-cur').textContent=d.currency;
+      document.getElementById('sv-cash').textContent=Number(d.available).toFixed(2);
+      const p=Number(d.unrealised);
+      const pe=document.getElementById('sv-pnl');
+      pe.textContent=(p>=0?'+':'')+p.toFixed(2); pe.className='stat-val '+(p>=0?'up':'down');
+      document.getElementById('sv-mode').textContent=d.mode.toUpperCase();
+    }else{
+      dot.className='dot err'; txt.textContent='Not connected';
+      document.getElementById('acctErr').innerHTML=`<div class="err-banner">⚠ T212 connection failed: ${d.error||'Check API key in app.py'}</div>`;
+    }
+  }catch(e){
+    document.getElementById('sDot').className='dot err';
+    document.getElementById('sTxt').textContent='Server offline';
+  }
+}
+
+// movers
+async function loadMovers(){
+  try{
+    const d=await(await fetch('/api/market_movers')).json();
+    document.getElementById('mTime').textContent='Updated '+d.updated;
+    document.getElementById('wc').textContent=d.winners.length;
+    document.getElementById('lc').textContent=d.losers.length;
+    document.getElementById('sc2').textContent=d.spikes.length;
+    document.getElementById('cc').textContent=d.crashes.length;
+    document.getElementById('wList').innerHTML=d.winners.map(s=>`
+      <div class="mr"><span class="mr-ticker">${s.ticker}</span><span class="mr-price">$${s.price}</span>
+      <span class="mr-chg up">+${s.change.toFixed(2)}%</span></div>`).join('')||'<div class="loading-row">No data</div>';
+    document.getElementById('lList').innerHTML=d.losers.map(s=>`
+      <div class="mr"><span class="mr-ticker">${s.ticker}</span><span class="mr-price">$${s.price}</span>
+      <span class="mr-chg dn">${s.change.toFixed(2)}%</span></div>`).join('')||'<div class="loading-row">No data</div>';
+  }catch(e){
+    document.getElementById('wList').innerHTML='<div class="loading-row" style="color:var(--red)">Market data unavailable</div>';
+  }
+}
+
+// positions
+async function loadPos(){
+  const el=document.getElementById('posContent');
+  el.innerHTML='<div class="loading-row"><span class="spin">↻</span>Loading…</div>';
+  try{
+    const d=await(await fetch('/api/portfolio')).json();
+    if(d.error){el.innerHTML=`<div class="err-banner">${d.error}</div>`;return;}
+    const pos=d.positions||[];
+    if(!pos.length){el.innerHTML='<div class="loading-row">No open positions</div>';return;}
+    el.innerHTML=`<div style="overflow-x:auto"><table class="pos-tbl">
+      <thead><tr><th>Ticker</th><th>Qty</th><th>Avg Price</th><th>Current</th><th>Value</th><th>P&L</th><th>Return</th></tr></thead>
+      <tbody>${pos.map(p=>{
+        const pnl=p.ppl||0,avg=p.averagePrice||0,cur=p.currentPrice||0;
+        const pct=avg?((cur-avg)/avg*100).toFixed(2):0;
+        return `<tr><td>${p.ticker}</td><td>${Number(p.quantity).toFixed(4)}</td>
+          <td>$${Number(avg).toFixed(4)}</td><td>$${Number(cur).toFixed(4)}</td>
+          <td>$${Number(p.currentValue||0).toFixed(2)}</td>
+          <td><span class="tag ${pnl>=0?'up':'dn'}">${pnl>=0?'+':''}${Number(pnl).toFixed(2)}</span></td>
+          <td><span class="tag ${pct>=0?'up':'dn'}">${pct>=0?'+':''}${pct}%</span></td></tr>`;
+      }).join('')}</tbody></table></div>`;
+  }catch(e){el.innerHTML=`<div class="err-banner">Error: ${e.message}</div>`;}
+}
+
+// AI streaming
+function streamAI(outputId, payload, titleText){
+  if(scanning)return; scanning=true;
+  const wrap=document.getElementById(outputId);
+  wrap.querySelector('.ai-hdr').innerHTML=
+    `<span class="ai-hdr-title">${titleText||'Scanning…'}</span>
+     <span class="ai-scanning"><span class="spin">↻</span>AI searching live data…</span>`;
+  const body=wrap.querySelector('.ai-body');
+  body.innerHTML=''; let buf='';
+
+  // disable buttons
+  const btn=document.getElementById('picksBtn');
+  if(btn) btn.disabled=true;
+
+  fetch('/api/ai_scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  .then(res=>{
+    const reader=res.body.getReader(),dec=new TextDecoder();
+    function pump(){
+      reader.read().then(({done,value})=>{
+        if(done){
+          scanning=false;
+          if(btn) btn.disabled=false;
+          wrap.querySelector('.ai-hdr').innerHTML=
+            `<span class="ai-hdr-title">Analysis Complete</span>
+             <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)">${new Date().toLocaleTimeString()}</span>`;
+          return;
+        }
+        dec.decode(value).split('\n').forEach(line=>{
+          if(line.startsWith('data: ')&&line!=='data: [DONE]'){
+            try{
+              const obj=JSON.parse(line.slice(6));
+              if(obj.text){buf+=obj.text;body.innerHTML=fmt(buf);body.scrollTop=body.scrollHeight;}
+            }catch(e){}
+          }
+        });
+        pump();
+      });
+    }pump();
+  }).catch(e=>{
+    scanning=false;
+    if(btn) btn.disabled=false;
+    body.innerHTML=`<div style="color:var(--red)">Error: ${e.message}</div>`;
+  });
+}
+
+function fmt(t){
+  return t
+    .replace(/▲/g,'<span class="up-t">▲</span>')
+    .replace(/▼/g,'<span class="dn-t">▼</span>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^#{1,3} (.+)$/gm,'<h3>$1</h3>')
+    .replace(/✅/g,'<span style="color:var(--green)">✅</span>')
+    .replace(/⛔/g,'<span style="color:var(--red)">⛔</span>')
+    .replace(/🏆/g,'<span>🏆</span>')
+    .replace(/\n/g,'<br>');
+}
+
+function scan(type){ streamAI('scanOut',{type,market:mkt},type.toUpperCase()+' SCAN'); }
+function runPicks(){ streamAI('picksOutput',{type:'picks',market:mkt},'AI INVESTMENT PICKS'); }
+function runAsk(){
+  const q=document.getElementById('askIn').value.trim();
+  if(!q)return;
+  streamAI('askOut',{type:'custom',market:mkt,question:q},'AI RESPONSE');
+}
+function setQ(q){document.getElementById('askIn').value=q;}
+
+async function runPortAI(){
+  const r=await fetch('/api/portfolio');
+  const d=await r.json();
+  let ctx='No positions.';
+  if(d.positions){
+    const s=d.summary||{},inv=s.investments||{};
+    ctx=`Total: ${s.totalValue} ${s.currency}\nP&L: ${inv.unrealizedProfitLoss}\n\nPositions:\n`+
+      d.positions.map(p=>`${p.ticker}: qty=${p.quantity}, avg=$${p.averagePrice}, now=$${p.currentPrice}, pnl=${p.ppl}`).join('\n');
+  }
+  streamAI('portAIOut',{type:'portfolio_analysis',portfolio:ctx,market:mkt},'PORTFOLIO ANALYSIS');
+}
+
+// init
+loadStatus();
+loadMovers();
+setInterval(loadMovers,60000);
+</script>
+</body>
+</html>
